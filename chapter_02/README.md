@@ -255,3 +255,214 @@ func main() {
    0 1 2 3 4
    1 1024 1048576 1073741824 1099511627776 1125899906842624
    ```
+
+### 四、条件语句
+
+1. #### if 语句
+
+   - if 的条件里不需要括号
+   - if 的条件里可以赋值
+   - if 的条件里赋值的变量作用域就在这个 if 语句里
+
+   ```go
+   package main
+   
+   import (
+   	"fmt"
+   	"io/ioutil"
+   )
+   
+   func readFile1() {
+   	const filename = "learnGo/chapter_02/02_branch/abc.txt" // abc.txt = aaaa\nbbbbb\ncccc
+   	contents, err := ioutil.ReadFile(filename)
+   	if err != nil {
+   		fmt.Println(err)
+   	}else{
+   		fmt.Printf("%s\n", contents)
+   	}
+   }
+   
+   func readFile2() {
+   	const filename = "learnGo/chapter_02/02_branch/abc.txt" // abc.txt = aaaa\nbbbbb\ncccc
+   	if contents, err := ioutil.ReadFile(filename); err != nil {
+   		fmt.Println(err)
+   	}else {
+   		fmt.Printf("%s\n", contents)
+   	}
+   	//fmt.Println("%s\n", contents)   # contents 是if中定义的变量，出了if后，变量的生命周期结束了
+   }
+   
+   func main() {
+   	readFile1()
+   	fmt.Println()
+   	readFile2()
+   }
+   ```
+
+   输出结果：
+
+   ```go
+   aaaa
+   bbbbb
+   cccc
+   
+   aaaa
+   bbbbb
+   cccc
+   ```
+
+2. #### switch 语句
+
+   - switch 会自动 break，除非使用 fallthrough
+   - switch 后可以没有表达式
+
+   ```go
+   package main
+   
+   import "fmt"
+   
+   // switch 语句
+   func grade(score int) string {
+   	g := ""
+   	switch {
+   	case score < 0 || score > 100:
+   		panic(fmt.Sprintf("Wrong score: %d", score))
+   	case score < 60:
+   		g = "F"
+   	case score < 70:
+   		g = "D"
+   	case score < 80:
+   		g = "C"
+   	case score < 90:
+   		g = "B"
+   	case score <= 100:
+   		g = "A"
+   	}
+   	return g
+   }
+   
+   func main() {
+   	fmt.Println(grade(30))
+       fmt.Println(grade(60))
+       fmt.Println(grade(70))
+       fmt.Println(grade(80))
+       fmt.Println(grade(90))
+       fmt.Println(grade(100))
+       //fmt.Println(grade(-1))
+       //fmt.Println(grade(101))
+   }
+   ```
+
+   输出结果：
+
+   ```go
+   F
+   D
+   C
+   B
+   A
+   A
+   ```
+
+###  五、循环语句
+
+1. #### for 语句
+
+   - for 的条件里不需要括号
+   - for 的条件里可以省略初始条件，结束条件，递增表达式
+   - for 省略初始条件，相当于 while
+   - for 省略初始条件和递增条件，相当于 while
+   - for 初始条件，结束条件，递增表达式 都不加就是死循环
+
+   ```go
+   s := "abc"
+   
+   for i, n := 0, len(s); i < n; i++ { // 常见的 for 循环，支持初始化语句。
+       println(s[i])
+   }
+   
+   n := len(s)
+   for n > 0 {                // 替代 while (n > 0) {}
+       println(s[n])        // 替代 for (; n > 0;) {}
+       n-- 
+   }
+   
+   for {                    // 替代 while (true) {}
+       println(s)            // 替代 for (;;) {}
+   }
+   ```
+
+   ```go
+   package main
+   
+   import (
+   	"bufio"
+   	"fmt"
+   	"os"
+   	"strconv"
+   	"time"
+   )
+   
+   // for 省略初始条件,相当于while
+   func convertTOBin(n int) string {
+   	inputN := n
+   	res := ""
+   	for ; n >0; n /= 2 {
+   		lsb := n % 2
+   		res = strconv.Itoa(lsb) + res
+   	}
+   	fmt.Printf("Int: %10d, Bin: %s\n", inputN, res)
+   	return res
+   }
+   
+   // for 省略初始条件和递增条件
+   func printFile(filename string) {
+   	file, err := os.Open(filename)
+   	if err != nil {
+   		panic(err)
+   	}
+   	scanner := bufio.NewScanner(file)
+   	for ; scanner.Scan(); {
+   		fmt.Println(scanner.Text())
+   	}
+   }
+   
+   //3.初始条件,结束条件,递增表达式都不加就是死循环
+   func forever() string {
+   	for {
+   		fmt.Println("Forever loop")
+   		time.Sleep(1 * time.Second)
+   	}
+   }
+   
+   func main() {
+   	convertTOBin(5)
+   	convertTOBin(9)
+   	convertTOBin(13)
+   	convertTOBin(32)
+   	convertTOBin(34534)
+   	fmt.Println()
+   	const filename = "learnGo/chapter_02/02_branch/abc.txt" // abc.txt = aaaa\nbbbbb\ncccc
+   	printFile(filename)
+   	fmt.Println()
+   	forever()
+   }
+   ```
+
+   输出结果：
+
+   ```go
+   Int:          5, Bin: 101
+   Int:          9, Bin: 1001
+   Int:         13, Bin: 1101
+   Int:         32, Bin: 100000
+   Int:      34534, Bin: 1000011011100110
+   
+   aaaa
+   bbbbb
+   cccc
+   
+   Forever loop
+   Forever loop
+   Forever loop
+   ```
