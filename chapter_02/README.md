@@ -466,3 +466,155 @@ func main() {
    Forever loop
    Forever loop
    ```
+
+### 六、函数
+
+- 函数定义`func eval(a, b int, op string) int {}`
+- 返回值类型写在最后面
+- 可返回多个值
+- 函数可作为参数
+- 没有默认参数，可选参数
+
+```go
+package main
+
+import (
+	"fmt"
+	"math"
+	"reflect"
+	"runtime"
+)
+
+// 函数定义，可以返回多个值
+func eval(a, b int, op string) (int, error) {
+	res := 0
+	switch op {
+	case "+":
+		res = a + b
+	case "-":
+		res = a - b
+	case "*":
+		res = a * b
+	case "/":
+		//res = a / b
+		res, _ = div(a, b)
+	default:
+		//return res, fmt.Errorf("unsupport operation: %s", op)
+	}
+	return res, nil
+}
+
+// 7 / 4 = 1 ... 3
+// 输出起名字
+func div(a, b int) (q, r int) {
+	//q = a / b
+	//r = a % b
+	//fmt.Printf("%d / %d = %d ... %d\n", a, b, q, r)
+	//return
+	return a / b, a % b
+}
+
+// 函数的参数可以是函数
+func apply(op func(int, int) int, a, b int) int {
+	p := reflect.ValueOf(op).Pointer()
+	opName := runtime.FuncForPC(p).Name()
+	fmt.Printf("Calling function: %s with args: (%d, %d)\n", opName, a, b)
+	return op(a, b)
+}
+
+// 定义pow函数
+func pow(a, b int) int {
+	return int(math.Pow(float64(a), float64(b)))
+}
+
+// 可变参数列表
+func sum(numbers ...int) int {
+	sum := 0
+	for i:=range numbers {
+		sum += numbers[i]
+	}
+	return sum
+}
+
+func main() {
+	if res, err := eval(4, 3, "-"); err != nil {
+		fmt.Printf("Error: %s\n", err)
+		panic(err)
+	} else {
+		fmt.Println(res)
+	}
+
+	q, r := div(10, 3)
+	fmt.Printf("10 / 3 = %d ... %d\n", q, r)
+
+	fmt.Println(apply(pow, 3, 4))
+
+	fmt.Println(apply(
+		func(a int, b int) int {
+			return int(math.Pow(float64(a), float64(b)))
+		}, 3, 4))
+
+	fmt.Println(sum(1, 2, 3, 4, 5))
+}
+```
+
+输出结果：
+
+```go
+1
+10 / 3 = 3 ... 1
+Calling function: main.pow with args: (3, 4)
+81
+Calling function: main.main.func1 with args: (3, 4)
+81
+15
+```
+
+###  七、指针
+
+- Go 语言指针不能运算
+- Go 语言只有值传递一种方式
+
+1. 参数传递
+
+   ![参数传递](https://raw.githubusercontent.com/lovelifeloveyou/somePic/master/learn-go/202308182327018.png)
+
+2. 拷贝一份 a 的地址，使用指针传递相当于引用传递的效果
+
+   ![img](https://raw.githubusercontent.com/lovelifeloveyou/somePic/master/learn-go/202308182327864.png)
+
+3. Go 语言中 Object 类型的名字叫 Cache
+
+   ![img](https://raw.githubusercontent.com/lovelifeloveyou/somePic/master/learn-go/202308182328239.png)
+
+```go
+package main
+
+import "fmt"
+
+// 通过指针来交换值
+func swap1(a, b *int) {
+	*a, *b = *b, *a
+}
+
+func swap2(a, b int) (int, int) {
+	return b, a
+}
+
+func main() {
+	a, b := 3, 4
+	swap1(&a, &b)
+	fmt.Println(a, b)
+	a, b = 3, 4
+	a, b = swap2(a, b)
+	fmt.Println(a, b)
+}
+```
+
+输出结果：
+
+```go
+4 3
+4 3
+```
+
