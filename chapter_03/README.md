@@ -330,3 +330,218 @@ Traversal (_, val)
   Slice s=[0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15], len=16, cap=16
   Slice s=[0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17], len=18, cap=32
   ```
+
+###  三、Map
+
+1. Map 的操作
+
+   - Map：`map[k]v, map[k1]map[k2]V（复合 map）`
+   - 创建：`make(map[string]int)`
+   - 获取元素：`m[key]`
+   - key 不存在时，获得 value 类型的初始值（Zero value）
+   - 用 `value, ok := m[key]` 来判断是否存在 key
+   - 用 delete 删除一个 key
+
+2. map 的遍历
+
+   - 使用 range 遍历 key，或者遍历 key, value 对
+   - 不保证遍历顺序，如需顺序，需手动对 key 排序
+   - 使用 len 获取元素个数
+
+3. map 中的 key
+
+   - map 使用哈希表，必须可以比较相等
+   - 除 slice，map，function 外的内建类型都可以作为 key
+   - Struct 类型不包含上述字段，也可作为 key
+
+4. Map 的基本操作示例
+
+   ```go
+   package main
+   
+   import "fmt"
+   
+   func main() {
+   	// map 的定义
+   	fmt.Println("------------ map 的定义 ----------")
+   	m := map[string]string{
+   		"course": "golang",
+   		"site":   "imooc",
+   	}
+   	m1 := make(map[string]int)
+   	var m2 map[string]int
+   	fmt.Println("m=", m)
+   	fmt.Println("m1=", m1)
+   	fmt.Println("m2=", m2)
+   
+   	// 定义 map 中嵌套 map
+   	mm := map[string]map[string]string{
+   		"name": {
+   			"first":  "Wang",
+   			"second": "er"},
+   		"age": {"last_year": "18"}}
+   	for k, v := range mm {
+   		fmt.Println(k, v)
+   	}
+   
+   	// map 的遍历
+   	fmt.Println("------------ map 的遍历 ----------")
+   	for k, v := range m {
+   		fmt.Println(k, v)
+   	}
+   	fmt.Println("只遍历 map 中的 key")
+   	for k := range m { // 只遍历 map 中的 key
+   		fmt.Println(k)
+   	}
+   	fmt.Println("只遍历 map 中的 val")
+   	for _, v := range m { // 只遍历 map 中的 val
+   		fmt.Println(v)
+   	}
+   
+   	// 获取 map 中的值
+   	fmt.Println("------------ 修改和删除map中的值 ----------")
+   	fmt.Println("len(m) = ", len(m))
+   	fmt.Println("m['course'] = ", m["course"])
+   	// 如果获取的key不存在，就会返回默认值
+   	fmt.Println("m['name'] = ", m["name"]) // "golang true"
+   	val, ok := m["course"]                 // " false"
+   	fmt.Println(val, ok)
+   	val, ok = m["name"]
+   	fmt.Println(val, ok)
+   	// 判断 m 中是否有 key = "name" 的元素
+   	if v, ok := m["name"]; ok {
+   		fmt.Println("m['name'] = ", v)
+   	} else {
+   		fmt.Println("The element[name] dose not exist.")
+   	}
+   
+   	// 修改和删除 map 中的值
+   	fmt.Println("------------ 修改和删除map中的值 ----------")
+   	delete(m, "course")
+   	fmt.Println("m=", m)
+   
+   }
+   ```
+
+   输出结果：
+
+   ```go
+   ------------ map 的定义 ----------
+   m= map[course:golang site:imooc]
+   m1= map[]
+   m2= map[]
+   age map[last_year:18]
+   name map[first:Wang second:er]
+   ------------ map 的遍历 ----------
+   course golang
+   site imooc
+   只遍历 map 中的 key
+   course
+   site
+   只遍历 map 中的 val
+   golang
+   imooc
+   ------------ 修改和删除map中的值 ----------
+   len(m) =  2
+   m['course'] =  golang
+   m['name'] =  
+   golang true
+    false
+   The element[name] dose not exist.
+   ------------ 修改和删除map中的值 ----------
+   m= map[site:imooc]
+   ```
+
+5. map 例题
+
+###  四、字符和字符串处理
+
+1. rune
+
+   - rune 相当于 go 的 char
+
+   - 使用 range 遍历字符串 pos 时，rune 是按照真实字符的 pos
+
+     ```go
+     s := "You弄啥了!"
+     for i, ch := range s {      // ch is a rune
+     	//fmt.Printf("(%d, %d, %c) ", i, ch, ch)
+     	fmt.Printf("(%d, %x) ", i, ch)          // ((0, 59) (1, 6f) (2, 75) (3, 5f04) (6, 5565) (9, 4e86) (12, 21)
+     }
+     fmt.Println()
+     for i, ch := range []rune(s) {
+     	//fmt.Printf("(%d, %x, %c) ", i, ch, ch)
+     	fmt.Printf("(%d, %x) ", i, ch)          // (0, 59) (1, 6f) (2, 75) (3, 5f04) (4, 5565) (5, 4e86) (6, 21)
+     }
+     ```
+
+   - 使用 `utf8.RuneCountInString` 获得字符数量是正确的， len 获取字符串包含中文的字符数是不准确的
+
+     ```go
+     s := "You弄啥了!"
+     fmt.Println(s, "len=", len(s))   // 输出: You弄啥了! len= 13
+     fmt.Println(s, "Rune count=", utf8.RuneCountInString(s))  // 输出: You弄啥了! Rune count= 7
+     ```
+
+   - 测试代码
+
+     ```go
+     package main
+     
+     import (
+         "fmt"
+         "unicode/utf8"
+     )
+     
+     func main() {
+         s := "You弄啥了!"
+         fmt.Println(s, "len=", len(s))   // 输出: You弄啥了! len= 13
+         fmt.Println(s, "Rune count=", utf8.RuneCountInString(s))  // 输出: You弄啥了! Rune count= 7
+         fmt.Println("--------------分割线----------------")
+         fmt.Println("[]byte(s) = ", []byte(s))
+         fmt.Println("[]rune(s) = ", []rune(s))
+         fmt.Println()
+         fmt.Println("--------------分割线----------------")
+         for i, ch := range s {      // ch is a rune
+             //fmt.Printf("(%d, %d, %c) ", i, ch, ch)
+             fmt.Printf("(%d, %x) ", i, ch)          // ((0, 59) (1, 6f) (2, 75) (3, 5f04) (6, 5565) (9, 4e86) (12, 21)
+         }
+         fmt.Println()
+         for i, ch := range []rune(s) {
+             //fmt.Printf("(%d, %x, %c) ", i, ch, ch)
+             fmt.Printf("(%d, %x) ", i, ch)          // (0, 59) (1, 6f) (2, 75) (3, 5f04) (4, 5565) (5, 4e86) (6, 21)
+         }
+         fmt.Println()
+         fmt.Println("--------------分割线----------------")
+         s = "You弄啥了!"
+         myBytes := []byte(s)
+         for len(myBytes) > 0 {
+             ch, size := utf8.DecodeRune(myBytes)
+             myBytes = myBytes[size:]
+             fmt.Printf("%c ", ch)   // Y o u 弄 啥 了 !
+         }
+     }
+     ```
+
+     输出结果：
+
+     ```go
+     You弄啥了! len= 13
+     You弄啥了! Rune count= 7
+     --------------分割线----------------
+     []byte(s) =  [89 111 117 229 188 132 229 149 165 228 186 134 33]
+     []rune(s) =  [89 111 117 24324 21861 20102 33]
+     
+     --------------分割线----------------
+     (0, 59) (1, 6f) (2, 75) (3, 5f04) (6, 5565) (9, 4e86) (12, 21) 
+     (0, 59) (1, 6f) (2, 75) (3, 5f04) (4, 5565) (5, 4e86) (6, 21) 
+     --------------分割线----------------
+     Y o u 弄 啥 了 ! 
+     ```
+
+2. 字符串的内建操作
+
+   - Fields, Split, Join
+   - Contains, Index
+   - ToLower, ToUpper
+   - Trim, TrimRight, TrimLeft
